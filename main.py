@@ -5,7 +5,6 @@ import json
 import random
 import asyncio
 from requests.exceptions import RequestException
-
 #Version command output
 version = "Denizkar Bot's version is currently version 0.2.0"
 
@@ -62,36 +61,50 @@ async def on_message(message):
 
 
 @bot.command(name='unsad', help= 'use this when you\'re sad =}', Category='Cheerful')
+@commands.cooldown(1, 1, commands.BucketType.guild)
 async def unsad(ctx):
+	
 	def get_quote():
 		response = requests.get("https://zenquotes.io/api/random")
 		json_data = json.loads(response.text)
 		quote = json_data[0]['q'] + " -" + json_data[0]['a']
+		asyncio.sleep(1)
 		return (quote)
+		
 	quote = get_quote()
+	
 	await ctx.send(quote)
 
 @bot.command(name='ram', help='you\'ll find out what this does if you use it', Category='Fun')
+@commands.cooldown(1, 1, commands.BucketType.guild)
 async def ram(ctx):
-	await ctx.send('Ram is best girl, but we all know that I am second best =}')
+		await ctx.send('Ram is best girl, but we all know that I am second best =}')
+
+
+
 
 @bot.command(name='coin', help='flip a coin', Category='Utility')
+@commands.cooldown(1, 1, commands.BucketType.guild)
 async def coin(ctx):
 	await ctx.send(random.choice(coin))
 
 @bot.command(name='version', help='Version of the bot.', Category='Bot Info')
+@commands.cooldown(1, 1, commands.BucketType.guild)
 async def version(ctx):
 	await ctx.send(version)
 
 @bot.command(name='changelogs', help= 'Recent changes to the bot. Probably not helpful because they\'re likely outdated or have typos', Category='Bot Info')
+@commands.cooldown(1, 1, commands.BucketType.guild)
 async def changelogs(ctx):
 	await ctx.send(changelogstxt)
 
 @bot.command(name='toadd', help='Things that are likely be added to Denizkar Bot in the future. Probably changes frequently idk', Category='Bot Info')
+@commands.cooldown(1, 1, commands.BucketType.guild)
 async def toadd(ctx):
 	await ctx.send(toaddtxt)
 
 @bot.command(name='rolecreate', help='create a role with a hex color')
+@commands.cooldown(1, 1, commands.BucketType.guild)
 @commands.has_permissions(manage_roles=True)
 async def rolecreate(ctx, name, color):
 	print('command started')
@@ -101,20 +114,24 @@ async def rolecreate(ctx, name, color):
 	await ctx.send(f'Role `{name}` has been created""')
 	
 @bot.command(name="makesad", help="sends an ai-generated quote to probably make you sadn't")
+@commands.cooldown(1, 1, commands.BucketType.guild)
 async def makesad(ctx):
 
-    # sends GET request to Inspirobot for image url response
-    try:
-        url = 'http://inspirobot.me/api?generate=true'
-        params = {'generate' : 'true'}
-        response = requests.get(url, params, timeout=10)
-        image = response.text
-        await ctx.send(image)
-        
-    except RequestException:
-        
-        await ctx.send('Inspirobot is broken, there is no reason to live.')
+	# sends GET request to Inspirobot for image url response
+	try:
+		print('h')
+		url = 'http://inspirobot.me/api?generate=true'
+		params = {'generate' : 'true'}
+		response = requests.get(url, params, timeout=10)
+		image = response.text
+		await asyncio.sleep(1)
 
-
+		await ctx.send(image)
+		
+	except RequestException:
+		
+		await ctx.send('Inspirobot is broken, there is no reason to live.')
+import keep_alive
+keep_alive.keep_alive()
 
 bot.run(os.getenv('TOKEN'))
