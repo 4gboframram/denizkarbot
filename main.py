@@ -119,13 +119,10 @@ async def makesad(ctx):
 
 	# sends GET request to Inspirobot for image url response
 	try:
-		print('h')
 		url = 'http://inspirobot.me/api?generate=true'
 		params = {'generate' : 'true'}
 		response = requests.get(url, params, timeout=10)
 		image = response.text
-		await asyncio.sleep(1)
-
 		await ctx.send(image)
 		
 	except RequestException:
