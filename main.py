@@ -6,7 +6,8 @@ import random
 import asyncio
 from requests.exceptions import RequestException
 client = discord.Client()
-
+intents = discord.Intents.default()
+intents.members = True
 #Sad Words
 sad_words = [
 	"sad",
@@ -32,22 +33,42 @@ bot = commands.Bot(command_prefix='!den ')
 @bot.event
 async def on_ready():
 	print(f'{bot.user.name} has connected to Discord!')
+	await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="All my Cuties :3"))
 
 
 @bot.event
 async def on_message(message):
+	sadge='sadge'
 	h = 'h', 'H', 'н'
 	msg = message.content
-	gn = 'gn', 'Gn', 'gn!', 'Gn!'
+	gn = 'gn ', 'Gn ', 'gn!'
+	gn2='gn', 'Gn'
+	gn3='agn', 'ign', 'egn', 'ogn', 'ugn'
 	if message.author == bot.user:
 		return
 	if any(word in msg for word in sad_words):	#detect sad words
-		await message.channel.send(random.choice(starter_encouragements))	#send encouragements
+		if msg in sadge:
+			await message.channel.send('sadge')
+			return
+		else: 
+			await message.channel.send(random.choice(starter_encouragements))	#send encouragements
 	if msg in h:	#detect h
 		await message.channel.send(random.choice(h))	#send h
 	await bot.process_commands(message)
-	if msg in gn:	#detect gn
+	if any(word in msg for word in gn):	#detect gn
+		if any(word in msg for word in gn3):
+			return
 		await message.channel.send('Sleepy well, cutie! :3')	#send h
+	if msg in gn2:
+		await message.channel.send('Sleepy well, cutie! :3')
+	if message.content.startswith('```'):
+		if message.author.guild_permissions.administrator: 
+			return
+		else: 
+			await message.delete()
+			embed=discord.Embed(title="Stop", description=f"{message.author.mention}, stop abusing syntax highlighting please. It's not funny.", colour=0xff0000)	
+			embed.set_author(name="Denizkar Bot", icon_url='https://cdn.discordapp.com/avatars/814549074938298370/449eec7e1b99f5bdf44992b2d8afe38a.webp?size=2048')
+			await message.channel.send(embed=embed)	
 @bot.event
 async def on_command_error(ctx, error):
 		# if command has local error handler, return
@@ -314,20 +335,56 @@ async def rate(ctx, thing):
 	embed.set_author(name="Denizkar Bot", icon_url='https://cdn.discordapp.com/avatars/814549074938298370/449eec7e1b99f5bdf44992b2d8afe38a.webp?size=2048')	
 	await ctx.send(embed=embed)
 
-@bot.command(name='getmember')
+@bot.command() 
 @commands.has_permissions(administrator=True)
-async def getmember(ctx):
-	f = open(f"{ctx.guild.id}.txt", "w")
-	guild = client.get_guild(ctx.guild.id)
-	memberList = guild.members
-	for member in memberList:
-		print(member)
-		f.write(f"{member}\n")
-	f.close()
-	print(len(memberList)
+async def send(ctx, message):
+	for guild in bot.guilds:
+		await ctx.send(guild)
+		embed=discord.Embed(title=f"Announcement from {ctx.author}, in {ctx.guild}", description=f"{message}",colour=0x666a66)
+		await guild.text_channels[0].send(embed=embed)
+@bot.command(name='status')
+@commands.has_permissions(administrator=True)
+async def status(ctx,type_,status):
+	embed=discord.Embed(title="Bot Status Changed", description=f"Denizkar Bot is now {type_} {status}", colour=0xadfea)	
+	embed.set_author(name="Denizkar Bot", icon_url='https://cdn.discordapp.com/avatars/814549074938298370/449eec7e1b99f5bdf44992b2d8afe38a.webp?size=2048')	
+	if type_=='playing':
+		await bot.change_presence(activity=discord.Game(name=status))
+		await ctx.send(embed=embed)
+	if type_=='streaming':
+		await bot.change_presence(activity=discord.Streaming(name=status, url='https://discordpy.readthedocs.io/'))
+		await ctx.send(embed=embed)
+	if type_=='listening':
+		await bot.change_presence(activity=discord.Listening(name=status))
+		await ctx.send(embed=embed)
+	if type_=='watching': 
+		await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name=status))
+		await ctx.send(embed=embed)
 
+@bot.command(name='half')
+async def half(ctx):
+	f=open('halfpercent.txt','r')
+	seeds=f.readlines()
+	seed=random.choice(seeds)
+	embed=discord.Embed(title="Half%", description=f"Here is your half% practice seed: {seed}", colour=0xddeffc, url=f'https://www.youtube.com/watch?v=FtutLA63Cp8')	
+	embed.set_author(name="Denizkar Bot", icon_url='https://cdn.discordapp.com/avatars/814549074938298370/449eec7e1b99f5bdf44992b2d8afe38a.webp?size=2048')
+	await ctx.send(embed=embed)
+
+@bot.command(name='alllogs')
+async def alllogs(ctx):
+	embed=discord.Embed(title="Logs%", description="You don't need a practice seed lol. The rsg is dead", colour=0xddeffc,)
+	embed.set_author(name="Denizkar Bot", icon_url='https://cdn.discordapp.com/avatars/814549074938298370/449eec7e1b99f5bdf44992b2d8afe38a.webp?size=2048')
+	await ctx.send(embed=embed)
+
+@bot.command()
+async def fsg(ctx):
+	embed=discord.Embed(title="fsg%", description='Just use the normal seed finder', colour=0xddeffc, url="https://repl.it/@AndyNovo/filteredseed")
+	embed.set_author(name="Denizkar Bot", icon_url='https://cdn.discordapp.com/avatars/814549074938298370/449eec7e1b99f5bdf44992b2d8afe38a.webp?size=2048')
+	await ctx.send(embed=embed)
+@bot.command()
+async def blue(ctx,message):
+	await ctx.send(f'```py \n\'{message}\'\n```')
 
 import keep_alive
 keep_alive.keep_alive()
 bot.run(os.getenv('TOKEN'))
-
+	
