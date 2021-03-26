@@ -8,6 +8,7 @@ from requests.exceptions import RequestException
 client = discord.Client()
 intents = discord.Intents.default()
 intents.members = True
+from levels2 import levels, xps, update_xp
 #Sad Words
 sad_words = [
 	"sad",
@@ -69,6 +70,16 @@ async def on_message(message):
 			embed=discord.Embed(title="Stop", description=f"{message.author.mention}, stop abusing syntax highlighting please. It's not funny.", colour=0xff0000)	
 			embed.set_author(name="Denizkar Bot", icon_url='https://cdn.discordapp.com/avatars/814549074938298370/449eec7e1b99f5bdf44992b2d8afe38a.webp?size=2048')
 			await message.channel.send(embed=embed)	
+	userid=message.author.id
+	update_xp(userid).gain().save()
+	if update_xp(userid).xp>= xps(update_xp(userid).level+1):
+		update_xp(userid).setxp(0)
+		update_xp(userid).increaselvl(1)
+		embed=discord.Embed(title="Level Up?", description=f"{message.author.mention}, you have leveled up to level {levels.dict[str(userid)][1]}. Poggies <3", colour=0xffbbcc)	
+		embed.set_author(name="Denizkar Bot", icon_url='https://cdn.discordapp.com/avatars/814549074938298370/449eec7e1b99f5bdf44992b2d8afe38a.webp?size=2048')
+		await message.channel.send(embed=embed)	
+
+
 @bot.event
 async def on_command_error(ctx, error):
 		# if command has local error handler, return
@@ -321,14 +332,15 @@ async def unlock(ctx, channel: discord.TextChannel,*, reason=None):
 
 @bot.command(name='percent')
 async def p(ctx, something):
-	embed=discord.Embed(title='Rate',description=f"{ctx.author.mention}, you are {random.randint(0,100)}% {something}",colour=0xcc00ff)
+	h=hash(str(ctx.author.id)+f' {something}')
+	embed=discord.Embed(title='Rate',description=f"{ctx.author.mention}, you are {h%101}% {something}",colour=0xcc00ff)
 	embed.set_author(name="Denizkar Bot", icon_url='https://cdn.discordapp.com/avatars/814549074938298370/449eec7e1b99f5bdf44992b2d8afe38a.webp?size=2048')	
 	await ctx.send(embed=embed)
 
 @bot.command(name='rate')
 async def rate(ctx, thing):
-	if thing=='Ram' or thing=='ram': randint=11
-	else: randint=random.randint(0,10)
+	if thing=='Ram' or thing=='ram' or thing=='denizkar' or thing=='Denizkar' or thing=='den' or thing=='Den': randint=11
+	else: randint=hash(thing)%11
 	if randint==8 or randint==11: article='an'
 	else: article='a'
 	embed=discord.Embed(title='Rate',description=f"I'd rate *{thing}* {article} {randint} out of 10",colour=0xcc00ff)
@@ -365,7 +377,7 @@ async def half(ctx):
 	f=open('halfpercent.txt','r')
 	seeds=f.readlines()
 	seed=random.choice(seeds)
-	embed=discord.Embed(title="Half%", description=f"Here is your half% practice seed: {seed}", colour=0xddeffc, url=f'https://www.youtube.com/watch?v=FtutLA63Cp8')	
+	embed=discord.Embed(title="Half%", description=f"Here is your half% practice seed: {seed}", colour=0xddeffc, url='https://www.youtube.com/watch?v=FtutLA63Cp8')	
 	embed.set_author(name="Denizkar Bot", icon_url='https://cdn.discordapp.com/avatars/814549074938298370/449eec7e1b99f5bdf44992b2d8afe38a.webp?size=2048')
 	await ctx.send(embed=embed)
 
@@ -384,7 +396,22 @@ async def fsg(ctx):
 async def blue(ctx,message):
 	await ctx.send(f'```py \n\'{message}\'\n```')
 
-import keep_alive
-keep_alive.keep_alive()
+
+from dotenv import load_dotenv, find_dotenv
+load_dotenv(find_dotenv())
+
+
+
+@bot.command()
+async def xp(ctx):
+	embed=discord.Embed(title='Level?',description=f"{ctx.author.mention}, you are level {update_xp(ctx.author.id).level}.\n You are {xps(update_xp(ctx.author.id).level+1)- update_xp(ctx.author.id).xp} away from leveling up to level {update_xp(ctx.author.id).level+1}",colour=0xcc00ff)
+	embed.set_author(name="Denizkar Bot", icon_url='https://cdn.discordapp.com/avatars/814549074938298370/449eec7e1b99f5bdf44992b2d8afe38a.webp?size=2048')	
+	await ctx.send(embed=embed)
+		
+
+
+
+from keep_alive import keep_alive
+keep_alive()
 bot.run(os.getenv('TOKEN'))
 	
